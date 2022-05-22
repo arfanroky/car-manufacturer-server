@@ -13,6 +13,9 @@ app.use(express.json());
 app.get('/', (req, res)=>{
     res.send('Hello from Car Manufacturer');
 });
+app.get('/', (req, res)=>{
+    res.send('Hello from Car Manufacturer heroku');
+});
 
 app.listen(port, () => {
     console.log('Listening the port', port);
