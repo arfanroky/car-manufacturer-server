@@ -132,9 +132,9 @@ const run = async () => {
 
 run().catch(console.dir);
 
-app.get('/', (req, res) => {
-  res.send('Hello from Car Manufacturer');
-});
+// app.get('/', (req, res) => {
+//   res.send('Hello from Car Manufacturer');
+// });
 
 app.get('/', (req, res) => {
   res.send('Hello from Car Manufacturer and try to solve heroku problem');
