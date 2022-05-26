@@ -115,7 +115,7 @@ const run = async () => {
     app.post('/create-payment-intent', async(req, res) =>{
       const product = req.body;
       const price = product.price;
-      const amount = price * 100;
+      const amount = parseInt(price) * 100;
       const paymentIntent = await stripe.paymentIntents.create({
         amount : amount,
         currency: 'usd',
@@ -136,6 +136,12 @@ const run = async () => {
       ).reverse(-6);
       res.send(equipments);
     });
+
+    app.post('/equipment', verifyToken, verifyAdmin, async(req, res) => {
+     const equipment = req.body;
+     const result = await carEquipmentsCollection.insertOne(equipment);
+     res.send(result)
+    })
 
     // get single
     app.get('/equipment/:id', async (req, res) => {
@@ -217,6 +223,9 @@ const run = async () => {
       const result = await ordersCollection.deleteOne(query);
       res.send({ success: 'Cancel Successfully', result });
     });
+
+
+
   } finally {
   }
 };
