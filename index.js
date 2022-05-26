@@ -71,7 +71,7 @@ const run = async () => {
       res.send({ admin: isAdmin });
     });
 
-    app.put('/user/admin/:email', verifyToken, async (req, res) => {
+    app.put('/user/admin/:email', verifyToken, verifyAdmin, async (req, res) => {
       const email = req.params.email;
       const filter = { email: email };
       const updateDoc = {
