@@ -175,6 +175,14 @@ const run = async () => {
      res.send(result)
     })
 
+    app.delete('/equipment/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await carEquipmentsCollection.deleteOne(query);
+      res.send({ success: 'Cancel Successfully', result });
+    });
+
+
     // get single
     app.get('/equipment/:id', async (req, res) => {
       const id = req.params.id;
