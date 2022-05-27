@@ -74,12 +74,12 @@ const run = async () => {
       res.send(result);
     })
 
-  
-  app.patch('/user/:email', async (req, res) => {
+  // UPDATE PROFILE
+  app.put('/user/:email', async (req, res) => {
     const email = req.params.email;
     const profileUpdate = req.body;
     const filter = { email: email };
-  
+    const options = { upsert: true };
     const updateDoc = {
       $set: {
         user: profileUpdate
@@ -88,10 +88,11 @@ const run = async () => {
 
     const result = await usersCollection.updateOne(
       filter,
-      updateDoc
+      updateDoc,
+      options
     );
       
-    res.send({message: true, result})
+    res.send({success: true, result})
   });
 
 
