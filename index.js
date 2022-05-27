@@ -66,6 +66,36 @@ const run = async () => {
       res.send(users);
     });
 
+    app.get('/user/:email', verifyToken, async(req, res) => {
+      const email = req.params.email;
+      const query = {email: email};
+      const result = await usersCollection.findOne(query);
+
+      res.send(result);
+    })
+
+  
+  app.put('/user/:email', async (req, res) => {
+    const email = req.params.email;
+    const profileUpdate = req.body;
+    const filter = { email: email };
+    const options = { upsert: true };
+    const updateDoc = {
+      $set: {
+        user: profileUpdate
+      }
+    };
+
+    const result = await usersCollection.updateOne(
+      filter,
+      updateDoc,
+      options
+    );
+      
+    res.send({message: true, result})
+  });
+
+
     app.get('/admin/:email', async (req, res) => {
       const email = req.params.email;
       const user = await usersCollection.findOne({ email: email });
@@ -133,12 +163,14 @@ const run = async () => {
       const query = {};
       const equipments = (
         await carEquipmentsCollection.find(query).toArray()
-      ).reverse(-6);
+      ).reverse();
       res.send(equipments);
     });
 
-    app.post('/equipment', verifyToken, verifyAdmin, async(req, res) => {
+    app.post('/equipment', async(req, res) => {
      const equipment = req.body;
+     console.log(req?.body);
+    //  console.log(res);
      const result = await carEquipmentsCollection.insertOne(equipment);
      res.send(result)
     })
@@ -176,6 +208,12 @@ const run = async () => {
 
       res.send({ success: true, result });
     });
+
+    app.get('/order', async(req, res) => {
+      const query = {};
+      const result = await ordersCollection.find(query).toArray();
+      res.send(result);
+    })
 
     // order get
     app.get('/order', verifyToken, async (req, res) => {
