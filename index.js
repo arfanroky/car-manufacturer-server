@@ -61,12 +61,12 @@ const run = async () => {
       }
     };
 
-    app.get('/user', verifyToken, async (req, res) => {
+    app.get('/user', async (req, res) => {
       const users = await usersCollection.find().toArray();
       res.send(users);
     });
 
-    app.get('/user/:email', verifyToken, async(req, res) => {
+    app.get('/user/:email', async(req, res) => {
       const email = req.params.email;
       const query = {email: email};
       const result = await usersCollection.findOne(query);
@@ -75,8 +75,8 @@ const run = async () => {
     })
 
   // UPDATE PROFILE
-  app.put('/user/:email',verifyToken, async (req, res) => {
-    const email = req.params.email;
+  app.put('/user/:email', verifyToken, async (req, res) => {
+    const email = req.query.email;
     const profileUpdate = req.body;
     const filter = { email: email };
     const options = { upsert: true };
