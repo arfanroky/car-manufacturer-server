@@ -75,8 +75,8 @@ const run = async () => {
     })
 
   // UPDATE PROFILE
-  app.put('/user', async (req, res) => {
-    const email = req.query.email;
+  app.put('/user/:email',verifyToken, async (req, res) => {
+    const email = req.params.email;
     const profileUpdate = req.body;
     const filter = { email: email };
     const options = { upsert: true };
