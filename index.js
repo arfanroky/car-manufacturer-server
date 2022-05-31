@@ -200,6 +200,7 @@ const run = async () => {
       res.send({ success: true, addReviews });
     });
 
+    // all Reviews
     app.get('/allReviews', async (req, res) => {
       const query = {};
       const reviews = (await reviewsCollection.find(query).toArray()).reverse(
