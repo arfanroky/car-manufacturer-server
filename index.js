@@ -66,7 +66,7 @@ const run = async () => {
       res.send(users);
     });
 
-    app.get('/user/:email', async(req, res) => {
+    app.get('/user/:email', verifyToken, async(req, res) => {
       const email = req.params.email;
       const query = {email: email};
       const result = await usersCollection.findOne(query);
@@ -75,15 +75,13 @@ const run = async () => {
     })
 
   // UPDATE PROFILE
-  app.put('/user/:email', verifyToken, async (req, res) => {
-    const email = req.query.email;
-    const profileUpdate = req.body;
+  app.patch('/profileUpdate/:email', verifyToken, async (req, res) => {
+    const email = req.params.email;
+    const user = req.body;
     const filter = { email: email };
     const options = { upsert: true };
     const updateDoc = {
-      $set: {
-        user: profileUpdate
-      }
+      $set: user
     };
 
     const result = await usersCollection.updateOne(
@@ -118,6 +116,7 @@ const run = async () => {
     app.put('/user/:email', async (req, res) => {
       const email = req.params.email;
       const user = req.body;
+      // console.log(user);
       const filter = { email: email };
       const options = { upsert: true };
       const updateDoc = {
@@ -129,6 +128,7 @@ const run = async () => {
         updateDoc,
         options
       );
+     
       const token = jwt.sign(
         { email: email },
         process.env.ACCESS_TOKEN_SECRET,
@@ -192,16 +192,15 @@ const run = async () => {
     });
 
     // review
-    app.post('/allReviews', async (req, res) => {
+    app.post('/allReviews',verifyToken, async (req, res) => {
       const ratings = req.body;
-      console.log(ratings);
       const addReviews = await reviewsCollection.insertOne(ratings);
 
       res.send({ success: true, addReviews });
     });
 
     // all Reviews
-    app.get('/allReviews', async (req, res) => {
+    app.get('/allReviews', verifyToken, async (req, res) => {
       const query = {};
       const reviews = (await reviewsCollection.find(query).toArray()).reverse(
         -3
@@ -218,27 +217,29 @@ const run = async () => {
       res.send({ success: true, result });
     });
 
-    app.get('/order', async(req, res) => {
-      const query = {};
-      const result = await ordersCollection.find(query).toArray();
-      res.send(result);
-    })
-
     // order get
     app.get('/order', verifyToken, async (req, res) => {
+      const query = {};
+      const result = await ordersCollection.find(query).toArray();
+     
+      res.send(result)
+    });
+    // order get by email
+    app.get('/order/:email', verifyToken, async (req, res) => {
       const decodedEmail = req.decoded.email;
-      const email = req.query.email;
+      const email = req.params.email;
+      console.log(decodedEmail, 'normal', email);
       if (decodedEmail === email) {
         const query = { email: email };
         const result = await ordersCollection.find(query).toArray();
-        res.send(result);
+        return res.send(result);
       } else {
-        res.status(403).send('Forbidden Access');
+        return res.status(403).send({message: 'Forbidden Access'});
       }
     });
 
 
-    app.get('/order/:id', verifyToken, async(req, res) => {
+    app.get('/order/:id', async(req, res) => {
       const id = req.params.id;
       const query = {_id: ObjectId(id)};
       const result = await ordersCollection.findOne(query);
@@ -246,7 +247,7 @@ const run = async () => {
       res.send(result)
     })
 
-    app.patch('/order/:id', verifyToken, async(req, res) =>{
+    app.patch('/order/:id',  async(req, res) =>{
       const id = req.params.id;
       const payment = req.body;
       const filter = {_id: ObjectId(id)};
