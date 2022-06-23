@@ -182,6 +182,19 @@ const run = async () => {
       res.send({ success: 'Cancel Successfully', result });
     });
 
+    //Put 
+    app.put('/equipment/:id', async(req, res) => {
+      const id = req.params.id;
+      const available_quantity = req.body.avQuantity;
+      const filter = {_id: ObjectId(id)};
+      const options = {upsert: true};
+      const doc = {
+        $set: {available_quantity}
+      }
+      const result = await carEquipmentsCollection.updateOne(filter, doc, options);
+
+      res.send({success: true, result})
+    })
 
     // get single
     app.get('/equipment/:id', async (req, res) => {
@@ -207,11 +220,16 @@ const run = async () => {
     });
 
     //order post
-    app.post('/order', async (req, res) => {
+    app.put('/order/:id', async (req, res) => {
+      const id = req.params.id;
       const orderData = req.body;
-      const result = await ordersCollection.insertOne(orderData);
+      const filter = {_id: ObjectId(id)};
+      const orderDoc = {
+        $set:orderData
+      }
+      const result = await ordersCollection.updateOne(filter, orderDoc);
 
-      res.send({ success: true, result });
+      res.send({success: true, result})
     });
 
     // order get
