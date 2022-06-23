@@ -192,7 +192,7 @@ const run = async () => {
     });
 
     // review
-    app.post('/allReviews',verifyToken, async (req, res) => {
+    app.post('/allReviews',verifyAdmin, async (req, res) => {
       const ratings = req.body;
       const addReviews = await reviewsCollection.insertOne(ratings);
 
@@ -200,13 +200,10 @@ const run = async () => {
     });
 
     // all Reviews
-    app.get('/allReviews', verifyToken, async (req, res) => {
+    app.get('/allReviews', verifyAdmin, async (req, res) => {
       const query = {};
-      const reviews = (await reviewsCollection.find(query).toArray()).reverse(
-        -3
-      );
-
-      res.send(reviews);
+      const reviews =  (await reviewsCollection.find(query).toArray()).reverse()
+      res.send({success: true, reviews});
     });
 
     //order post
