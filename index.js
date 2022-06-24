@@ -94,11 +94,11 @@ const run = async () => {
   });
 
 
-    app.get('/admin/:email', async (req, res) => {
+    app.get('/admin/:email',verifyToken, async (req, res) => {
       const email = req.params.email;
       const user = await usersCollection.findOne({ email: email });
       const isAdmin = user.role === 'admin';
-      res.send({ admin: isAdmin });
+      res.send(isAdmin);
     });
 
     app.put('/user/admin/:email', verifyToken, verifyAdmin, async (req, res) => {
@@ -143,14 +143,14 @@ const run = async () => {
 
     
     app.post('/create-payment-intent', async(req, res) =>{
-      const product = req.body;
-      const price = product.price;
+      const price = req.body.price;
       const amount = parseInt(price) * 100;
       const paymentIntent = await stripe.paymentIntents.create({
         amount : amount,
         currency: 'usd',
         payment_method_types:['card']
       });
+
       res.send({clientSecret: paymentIntent.client_secret})
     });
 
@@ -219,31 +219,44 @@ const run = async () => {
       res.send({success: true, reviews});
     });
 
-    //order post
+
+
+    //order put
     app.put('/order/:id', async (req, res) => {
       const id = req.params.id;
       const orderData = req.body;
+      const options = {upsert: true};
       const filter = {_id: ObjectId(id)};
       const orderDoc = {
         $set:orderData
       }
-      const result = await ordersCollection.updateOne(filter, orderDoc);
+      const result = await ordersCollection.updateOne(filter, orderDoc, options);
 
       res.send({success: true, result})
     });
 
     // order get
-    app.get('/order', verifyToken, async (req, res) => {
+    app.get('/order', async (req, res) => {
       const query = {};
       const result = await ordersCollection.find(query).toArray();
      
       res.send(result)
     });
+
+   
+    app.get('/order/payment', async(req, res) =>{
+      const id = req.query.id;
+      const filter = {_id: ObjectId(id)};
+      const result = await ordersCollection.findOne(filter);
+      res.send({success: true, result});
+    })
+
+
     // order get by email
-    app.get('/order/:email', verifyToken, async (req, res) => {
+    app.get('/order/:email',verifyToken, async (req, res) => {
       const decodedEmail = req.decoded.email;
       const email = req.params.email;
-      console.log(decodedEmail, 'normal', email);
+    
       if (decodedEmail === email) {
         const query = { email: email };
         const result = await ordersCollection.find(query).toArray();
@@ -254,19 +267,12 @@ const run = async () => {
     });
 
 
-    app.get('/order/:id', async(req, res) => {
-      const id = req.params.id;
-      const query = {_id: ObjectId(id)};
-      const result = await ordersCollection.findOne(query);
-
-      res.send(result)
-    })
-
+  
     app.patch('/order/:id',  async(req, res) =>{
       const id = req.params.id;
       const payment = req.body;
       const filter = {_id: ObjectId(id)};
-      const updatedoc = {
+      const updateDoc = {
         $set:{
           paid: true,
           paymentId: payment.transactionId
@@ -274,9 +280,9 @@ const run = async () => {
       }
 
       const result = await paymentCollection.insertOne(payment);
-      const updatedOrder = await ordersCollection.updateOne(filter, updatedoc);
+      const updatedOrder = await ordersCollection.updateOne(filter, updateDoc);
 
-      res.send(updatedOrder);
+      res.send({success: true});
     })
 
 
