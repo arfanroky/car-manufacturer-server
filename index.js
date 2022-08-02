@@ -180,18 +180,23 @@ const run = async () => {
     app.put('/equipment/:id', async (req, res) => {
       const id = req.params.id;
       let avQuantity = '';
+      let review = '';
       const available_quantity = req.body.avQuantity;
+      const userReview = req?.body?.review?.rating;
 
       if (available_quantity) {
         avQuantity = available_quantity;
       }
 
-      const review = req.body.review.rating;
+      if(userReview){
+        review = userReview;
+      }
+   
       const filter = { _id: ObjectId(id) };
       const options = { upsert: true };
       const doc = {
         $set: {
-          available_quantity: avQuantity,
+          available_quantity: Number(avQuantity),
           review,
         },
       };
@@ -212,13 +217,13 @@ const run = async () => {
       res.send(result);
     });
 
-    app.get('equipment/:id', async (req, res) => {
-      const id = req.params.id;
-      const query = { _id: ObjectId(id) };
-      const result = await carEquipmentsCollection.findOne(query);
+    // app.get('equipment/:id', async (req, res) => {
+    //   const id = req.params.id;
+    //   const query = { _id: ObjectId(id) };
+    //   const result = await carEquipmentsCollection.findOne(query);
 
-      res.send(result);
-    });
+    //   res.send(result);
+    // });
 
     //Review
     app.put('/userReview/:id', async (req, res) => {
